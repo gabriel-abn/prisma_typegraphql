@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator typegraphql {
+  provider = "typegraphql-prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @unique @default(uuid())
+  name           String
+  email          String
+  RecipesCookers RecipesCookers[]
+}
+
+model Recipe {
+  id             String           @id @unique @default(uuid())
+  name           String           @unique
+  RecipesCookers RecipesCookers[]
+  Order          Order[]
+}
+
+model RecipesCookers {
+  id     String @id @default(uuid())
+  userId String
+  cooker User   @relation(fields: [userId], references: [id])
+
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+}
+
+model Order {
+  id              String            @id @default(uuid())
+  food            Recipe            @relation(fields: [recipeId], references: [id])
+  recipeId        String
+  ordered_at      DateTime          @default(now())
+  OrdersDelivered OrdersDelivered[]
+}
+
+model OrdersDelivered {
+  id           Int      @id @default(autoincrement())
+  order        Order    @relation(fields: [orderId], references: [id])
+  orderId      String
+  delivered_at DateTime @default(now())
+}
